@@ -1,1 +1,404 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <title>Busca IA</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #0b0b0f;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 720px;
+            min-height: 100vh;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* CABEÇALHO */
+
+        header {
+            padding: 22px 20px;
+            text-align: center;
+            border-bottom: 1px solid #25252c;
+        }
+
+        .logo {
+            font-size: 27px;
+            font-weight: bold;
+        }
+
+        .logo span {
+            font-size: 30px;
+        }
+
+        header p {
+            color: #8c8c96;
+            margin-top: 6px;
+            font-size: 14px;
+        }
+
+        /* CHAT */
+
+        #chat {
+            flex: 1;
+            padding: 25px 18px 120px;
+            overflow-y: auto;
+        }
+
+        .welcome {
+            text-align: center;
+            margin-top: 28vh;
+            padding: 20px;
+        }
+
+        .welcome .robot {
+            font-size: 55px;
+            margin-bottom: 15px;
+        }
+
+        .welcome h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .welcome p {
+            color: #85858e;
+            font-size: 15px;
+        }
+
+        /* MENSAGENS */
+
+        .message {
+            margin-bottom: 22px;
+            line-height: 1.6;
+            animation: aparecer 0.25s ease;
+        }
+
+        @keyframes aparecer {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user {
+            background: #1c1c24;
+            padding: 14px 16px;
+            border-radius: 18px;
+            margin-left: 35px;
+        }
+
+        .ai {
+            padding: 8px 5px;
+        }
+
+        .label {
+            font-size: 13px;
+            color: #8d8d98;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        /* ÁREA DE ENVIO */
+
+        .input-area {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 720px;
+            padding: 12px 15px 18px;
+            background: rgba(11, 11, 15, 0.96);
+            border-top: 1px solid #25252c;
+        }
+
+        .input-box {
+            display: flex;
+            gap: 9px;
+            align-items: flex-end;
+        }
+
+        textarea {
+            flex: 1;
+            resize: none;
+            min-height: 50px;
+            max-height: 130px;
+            border: 1px solid #33333d;
+            background: #17171e;
+            color: white;
+            border-radius: 16px;
+            padding: 14px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: #666673;
+        }
+
+        button {
+            height: 50px;
+            border: none;
+            border-radius: 15px;
+            background: white;
+            color: black;
+            padding: 0 18px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:active {
+            transform: scale(0.96);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+        }
+
+        /* INDICADOR */
+
+        .loading {
+            display: inline-flex;
+            gap: 5px;
+            padding: 8px 0;
+        }
+
+        .dot {
+            width: 7px;
+            height: 7px;
+            background: #888;
+            border-radius: 50%;
+            animation: piscar 1.2s infinite;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes piscar {
+            0%, 80%, 100% {
+                opacity: 0.25;
+            }
+
+            40% {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <header>
+        <div class="logo">
+            <span>🧠</span> Busca IA
+        </div>
+
+        <p>
+            Várias inteligências. Uma resposta.
+        </p>
+    </header>
+
+
+    <main id="chat">
+
+        <div class="welcome" id="welcome">
+
+            <div class="robot">
+                🤖
+            </div>
+
+            <h2>
+                Como posso ajudar?
+            </h2>
+
+            <p>
+                Faça uma pergunta e deixe a Busca IA pensar por você.
+            </p>
+
+        </div>
+
+    </main>
+
+
+    <div class="input-area">
+
+        <div class="input-box">
+
+            <textarea
+                id="question"
+                rows="1"
+                placeholder="Digite sua pergunta..."
+            ></textarea>
+
+            <button
+                id="sendButton"
+                onclick="sendQuestion()"
+            >
+                Enviar
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    const input = document.getElementById("question");
+
+    const button = document.getElementById("sendButton");
+
+    const chat = document.getElementById("chat");
+
+
+    /* ENVIAR COM CTRL + ENTER */
+
+    input.addEventListener("keydown", function(event) {
+
+        if (event.key === "Enter" && event.ctrlKey) {
+
+            event.preventDefault();
+
+            sendQuestion();
+
+        }
+
+    });
+
+
+    /* AJUSTAR ALTURA DO CAMPO */
+
+    input.addEventListener("input", function() {
+
+        this.style.height = "auto";
+
+        this.style.height = Math.min(this.scrollHeight, 130) + "px";
+
+    });
+
+
+    /* ENVIAR PERGUNTA */
+
+    function sendQuestion() {
+
+        const question = input.value.trim();
+
+        if (!question) {
+            return;
+        }
+
+
+        const welcome = document.getElementById("welcome");
+
+        if (welcome) {
+            welcome.remove();
+        }
+
+
+        /* PERGUNTA DO USUÁRIO */
+
+        const userMessage = document.createElement("div");
+
+        userMessage.className = "message user";
+
+        userMessage.textContent = question;
+
+        chat.appendChild(userMessage);
+
+
+        /* RESPOSTA DA BUSCA IA */
+
+        const aiMessage = document.createElement("div");
+
+        aiMessage.className = "message ai";
+
+        aiMessage.innerHTML = `
+
+            <div class="label">
+                Busca IA
+            </div>
+
+            <div class="loading">
+
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+
+            </div>
+
+        `;
+
+        chat.appendChild(aiMessage);
+
+
+        /* LIMPAR CAMPO */
+
+        input.value = "";
+
+        input.style.height = "50px";
+
+        button.disabled = true;
+
+
+        /* SIMULAÇÃO TEMPORÁRIA */
+
+        setTimeout(function() {
+
+            aiMessage.innerHTML = `
+
+                <div class="label">
+                    Busca IA
+                </div>
+
+                Ainda estamos preparando meus cérebros de IA 🧠🤖.
+                Em breve esta pergunta será analisada por várias
+                inteligências antes de eu te entregar uma única resposta.
+
+            `;
+
+            button.disabled = false;
+
+            chat.scrollTop = chat.scrollHeight;
+
+        }, 1500);
+
+
+        chat.scrollTop = chat.scrollHeight;
+
+    }
+
+</script>
+
+</body>
+          </html>
