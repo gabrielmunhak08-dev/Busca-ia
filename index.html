@@ -29,8 +29,6 @@ body {
     flex-direction: column;
 }
 
-/* CABEÇALHO */
-
 .cabecalho {
     padding: 22px 20px;
     text-align: center;
@@ -52,8 +50,6 @@ body {
     font-size: 14px;
 }
 
-/* CHAT */
-
 .chat {
     flex: 1;
     padding: 20px;
@@ -66,6 +62,7 @@ body {
     border-radius: 15px;
     max-width: 90%;
     line-height: 1.5;
+    white-space: pre-wrap;
 }
 
 .ia {
@@ -84,8 +81,6 @@ body {
     color: #8b83ff;
     margin-bottom: 8px;
 }
-
-/* ÁREA DE PERGUNTA */
 
 .area-pergunta {
     padding: 15px;
@@ -125,15 +120,9 @@ button {
     cursor: pointer;
 }
 
-button:active {
-    transform: scale(0.96);
-}
-
 button:disabled {
     opacity: 0.5;
 }
-
-/* BOTÕES RÁPIDOS */
 
 .acoes {
     display: flex;
@@ -150,13 +139,8 @@ button:disabled {
     font-size: 13px;
     background: #17171f;
     border: 1px solid #30303a;
+    color: white;
 }
-
-.acao:hover {
-    background: #22222c;
-}
-
-/* RODAPÉ */
 
 .rodape {
     text-align: center;
@@ -171,92 +155,86 @@ button:disabled {
 
 <div class="aplicativo">
 
-    <header class="cabecalho">
-        <div class="logo">
-            Busca <span>IA</span>
+<header class="cabecalho">
+    <div class="logo">
+        Busca <span>IA</span>
+    </div>
+
+    <div class="subtitulo">
+        Seu assistente inteligente
+    </div>
+</header>
+
+<main class="chat" id="chat">
+
+    <div class="mensagem ia">
+
+        <div class="label">
+            Busca IA
         </div>
 
-        <div class="subtitulo">
-            Seu assistente inteligente
-        </div>
-    </header>
-
-
-    <main class="chat" id="chat">
-
-        <div class="mensagem ia">
-
-            <div class="label">
-                Busca IA
-            </div>
-
-            <div>
-                Olá! 👋<br><br>
-                Eu sou o Busca IA. Pode me fazer uma pergunta,
-                pedir uma explicação ou pesquisar uma ideia.
-            </div>
-
+        <div>
+            Olá! 👋<br><br>
+            Faça uma pergunta e eu vou consultar a inteligência artificial.
         </div>
 
-    </main>
+    </div>
 
+</main>
 
-    <section class="area-pergunta">
+<section class="area-pergunta">
 
-        <div class="acoes">
+    <div class="acoes">
 
-            <button
-                class="acao"
-                onclick="perguntaRapida('Me explique uma coisa de forma simples')">
-                💡 Explicar
-            </button>
+        <button class="acao"
+            onclick="perguntaRapida('Me explique uma coisa de forma simples')">
+            💡 Explicar
+        </button>
 
-            <button
-                class="acao"
-                onclick="perguntaRapida('Me dê uma ideia')">
-                💭 Ideia
-            </button>
+        <button class="acao"
+            onclick="perguntaRapida('Me dê uma ideia')">
+            💭 Ideia
+        </button>
 
-            <button
-                class="acao"
-                onclick="perguntaRapida('Faça um resumo')">
-                📝 Resumo
-            </button>
+        <button class="acao"
+            onclick="perguntaRapida('Faça um resumo')">
+            📝 Resumo
+        </button>
 
-        </div>
+    </div>
 
+    <form id="formulario">
 
-        <form id="formulario">
+        <input
+            id="entrada"
+            type="text"
+            placeholder="Digite sua pergunta..."
+            autocomplete="off"
+        >
 
-            <input
-                id="entrada"
-                type="text"
-                placeholder="Digite sua pergunta..."
-                autocomplete="off"
-            >
+        <button id="enviar" type="submit">
+            ➤
+        </button>
 
-            <button id="enviar" type="submit">
-                ➤
-            </button>
+    </form>
 
-        </form>
+    <div class="rodape">
+        Busca IA • Projeto experimental
+    </div>
 
-        <div class="rodape">
-            Busca IA • Projeto experimental
-        </div>
-
-    </section>
+</section>
 
 </div>
 
-
 <script>
+
+const ENDERECO_API =
+"https://busca-ia-api.gabrielmunhak08.workers.dev/";
 
 const formulario = document.getElementById("formulario");
 const entrada = document.getElementById("entrada");
 const chat = document.getElementById("chat");
 const enviar = document.getElementById("enviar");
-
 
 function adicionarMensagem(texto, tipo) {
 
@@ -267,142 +245,25 @@ function adicionarMensagem(texto, tipo) {
     if (tipo === "ia") {
 
         mensagem.innerHTML = `
-            <div class="label">
-                Busca IA
-            </div>
-
-            <div>
-                ${texto}
-            </div>
+            <div class="label">Busca IA</div>
+            <div class="conteudo"></div>
         `;
+
+        mensagem.querySelector(".conteudo").textContent = texto;
 
     } else {
 
-        mensagem.innerHTML = texto;
+        mensagem.textContent = texto;
 
     }
 
     chat.appendChild(mensagem);
 
     chat.scrollTop = chat.scrollHeight;
+
+    return mensagem;
 }
 
+async function enviarPergunta(pergunta) {
 
-function responder(pergunta) {
-
-    const texto = pergunta.toLowerCase();
-
-    if (
-        texto.includes("olá") ||
-        texto.includes("oi") ||
-        texto.includes("ola")
-    ) {
-
-        return "Olá! 😎 Como posso te ajudar?";
-
-    }
-
-
-    if (texto.includes("quem é você")) {
-
-        return "Eu sou o Busca IA, um assistente criado para responder perguntas e ajudar você.";
-
-    }
-
-
-    if (texto.includes("programação") ||
-        texto.includes("programar")) {
-
-        return "Programação é basicamente ensinar o computador a executar tarefas usando código. 💻";
-
-    }
-
-
-    if (texto.includes("ideia")) {
-
-        return "Uma ideia: podemos transformar o Busca IA em um aplicativo completo, com pesquisa, histórico de conversas e várias ferramentas. 🚀";
-
-    }
-
-
-    if (texto.includes("resumo")) {
-
-        return "Claro! Me envie o texto que você quer resumir e eu preparo uma versão mais curta.";
-
-    }
-
-
-    return "Ainda estamos preparando meus recursos de IA. 🤖\n\nSua pergunta foi recebida: \"" 
-        + pergunta + "\"\n\nEm breve podemos conectar este projeto a uma inteligência artificial de verdade.";
-
-}
-
-
-function enviarPergunta(pergunta) {
-
-    if (!pergunta.trim()) {
-        return;
-    }
-
-    adicionarMensagem(pergunta, "usuario");
-
-    entrada.value = "";
-
-    enviar.disabled = true;
-
-    adicionarMensagem(
-        "Pensando... 🤔",
-        "ia"
-    );
-
-    setTimeout(function() {
-
-        const mensagensIA =
-            document.querySelectorAll(".mensagem.ia");
-
-        const ultima =
-            mensagensIA[mensagensIA.length - 1];
-
-        ultima.innerHTML = `
-            <div class="label">
-                Busca IA
-            </div>
-
-            <div>
-                ${responder(pergunta)}
-            </div>
-        `;
-
-        enviar.disabled = false;
-
-        entrada.focus();
-
-        chat.scrollTop = chat.scrollHeight;
-
-    }, 1000);
-
-}
-
-
-formulario.addEventListener("submit", function(event) {
-
-    event.preventDefault();
-
-    enviarPergunta(entrada.value);
-
-});
-
-
-function perguntaRapida(texto) {
-
-    entrada.value = texto;
-
-    entrada.focus();
-
-}
-
-
-</script>
-
-</body>
-</html>
+    if (!per
